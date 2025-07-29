@@ -1,0 +1,18 @@
+{
+    "appName": "Battleships",
+    "create": "Create",
+    "enemy": "Enemy",
+    "enemyReady": "Enemy ready",
+    "enemyWon": "Enemy won",
+    "game": "Game",
+    "gameCanceled": "Game canceled",
+    "giveUp": "Give up",
+    "join": "Join",
+    "noActiveGame": "No active game",
+    "player": "Player",
+    "ready": "Ready",
+    "starting": "Starting",
+    "tour": "Tour",
+    "waitingForEnemyToJoin": "Waiting for enemy to join...",
+    "youWon": "You won!"
+}
