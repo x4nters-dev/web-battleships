@@ -22,13 +22,7 @@ const readyDisabled = computed(() => {
 
 
 function draw(cell: Cell): void {
-    const filled = board.value?.cells.flat().filter(c => c.status === CellStatus.filled).length ?? 0
-
-    if (cell.status === CellStatus.empty && filled >= 20) {
-        return
-    }
-
-    if (!validateMove(board.value!, cell.x, cell.y)) {
+    if (!board.value || !validateBoard(board.value, cell)) {
         return
     }
 
