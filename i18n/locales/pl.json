@@ -8,6 +8,10 @@
     "gameCanceled": "Gra przerwana",
     "giveUp": "Poddaj się",
     "join": "Dołącz",
+    "locale": {
+        "en": "English",
+        "pl": "Polski"
+    },
     "noActiveGame": "Brak aktywnych gier",
     "player": "Gracz",
     "ready": "Gotowy",

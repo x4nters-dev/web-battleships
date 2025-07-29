@@ -2,6 +2,7 @@ import { EventType } from '~~/shared/enums/events'
 import type { H3Event } from 'h3'
 import type { SseClient } from '~~/shared/types/sseClient'
 import type { EventPayload } from '~~/shared/types/events'
+import { logError, logInfo } from './logger'
 
 const clients = new Map<string, SseClient>()
 const games = new Map<string, SseClient[]>()
@@ -28,7 +29,8 @@ export function connect(params: {event: H3Event, playerId: string}): {playerId: 
     clients.set(playerId, client)
  
     res.write(wrapEventPayload(EventType.connected, { playerId }))
-    console.log(`[SSE] Connected [${playerId}]`)
+
+    logInfo('sse', `Connected: ${playerId}`)
 
     return { playerId }
 }
@@ -39,7 +41,12 @@ export function registerGame(params: {gameId: string }): void {
 
 export function joinGameEvents(params: {gameId: string, playerId: string}): void {
     const player = clients.get(params.playerId)
-    if (!player) throw Error('no player connected')
+
+    if (!player) {
+        logError('sse', `Invalid playerId: ${params.playerId}`)
+        return 
+    }
+
     games.get(params.gameId)?.push(player)
     sendToGame(params.gameId, EventType.joined, {
         bPlayerId: params.playerId,
@@ -49,7 +56,11 @@ export function joinGameEvents(params: {gameId: string, playerId: string}): void
 
 export function leaveGameEvents(params: {gameId: string, playerId: string}): { final: boolean } {
     const game = games.get(params.gameId)
-    if (!game) throw Error('no game')
+
+    if (!game) {
+        logError('sse', `Invalid gameId: ${params.gameId}`)
+        throw Error('invalid gameId')
+    }
     
     games.set(params.gameId, game.filter(g => g.playerId !== params.playerId) ?? [])
 
@@ -70,7 +81,12 @@ export function sendToAll<T extends EventType>(eventType: T, payload: EventPaylo
 
 export function sendToGame<T extends EventType>(gameId: string, eventType: T, payload: EventPayload<T>): void {
     const game = games.get(gameId)
-    if (!game) throw Error('no game')
+
+    if (!game) {
+        logError('sse', `Invalid gameId: ${gameId}`)
+        throw Error('no game')
+    }
+
     const players = Array.from(game.values())
 
     for (const { event } of players) {

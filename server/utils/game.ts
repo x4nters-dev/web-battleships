@@ -6,6 +6,7 @@ import type { Board } from "~~/shared/types/board"
 import type { Cell } from "~~/shared/types/cell"
 import { CellStatus } from "~~/shared/enums/cellStatus"
 import { ShotStatus } from "~~/shared/enums/shotStatus"
+import { logError } from "./logger"
 
 const games = new Map<string, Game>()
 
@@ -64,7 +65,11 @@ export function joinGame(params: { gameId: string, playerId: string }): void {
 
 export function setReadyState(params: { gameId: string, playerId: string, cells: Cell[][]}): void {
     const game = games.get(params.gameId)
-    if (!game) throw Error('no game')
+
+    if (!game) {
+        logError('game', `Invalid gameId: ${params.gameId}`)
+        throw Error('Invalid gameId')
+    }
 
     let board: Board
 
@@ -76,7 +81,8 @@ export function setReadyState(params: { gameId: string, playerId: string, cells:
             board = game.bBoard!
             break
         default:
-            throw Error('no player')
+            logError('game', `Invalid playerId: ${params.playerId}`)
+            throw Error('Invalid playerId')
     }
 
     board.cells = params.cells
@@ -105,7 +111,11 @@ export function setReadyState(params: { gameId: string, playerId: string, cells:
 
 export function tryShot(params: { attackerId: string, targetId: string, gameId: string, x: number, y: number }): void {
     const game = games.get(params.gameId)
-    if (!game) throw Error('no game')
+
+    if (!game) {
+        logError('sse', `Invalid gameId: ${params.gameId}`)
+        throw Error('Invalid gameId')
+    }
     
     let target: Board;
 
@@ -116,8 +126,9 @@ export function tryShot(params: { attackerId: string, targetId: string, gameId: 
         case game.bBoard?.playerId:
             target = game.bBoard!
             break
-            default:
-        throw Error('no player')
+        default:
+            logError('game', `Invalid targetId: ${params.targetId}`)
+            throw Error('Invalid targetId')
     }
 
     const cell = target.cells[params.x][params.y]
@@ -162,7 +173,11 @@ export function tryShot(params: { attackerId: string, targetId: string, gameId: 
 
 export function leaveGame(params: { gameId: string, playerId: string }): void {
     const game = games.get(params.gameId)
-    if (!game) throw Error('no game')
+
+    if (!game) {
+        logError('game', `Invalid gameId: ${params.gameId}`)
+        throw Error('Invalid gameId')
+    }
 
     if (game.status !== GameStatus.finished) {
         game.status = GameStatus.canceled

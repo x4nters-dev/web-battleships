@@ -8,6 +8,10 @@
     "gameCanceled": "Game canceled",
     "giveUp": "Give up",
     "join": "Join",
+    "locale": {
+        "en": "English",
+        "pl": "Polski"
+    },
     "noActiveGame": "No active game",
     "player": "Player",
     "ready": "Ready",

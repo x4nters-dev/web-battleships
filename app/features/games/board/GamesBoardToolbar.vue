@@ -1,5 +1,5 @@
 <template>
-    <v-toolbar>
+    <v-toolbar class="px-3">
         <template #append>
             <p>{{ tourLabel }}</p>
             <AppInfoIcon :enemy-id="enemyId" :game-id="game?.gameId" :player-id="player.playerId" />

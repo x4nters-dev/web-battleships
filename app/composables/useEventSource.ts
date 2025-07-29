@@ -8,7 +8,7 @@ export function useEventSource() {
 
     function on<T extends EventType>(eventType: T, callback: EventPayloadListener<T>): void {
         const listener = (event: MessageEvent<EventType>) => {
-            callback(getEventData<T>(eventType, event))
+            callback(getEventData<typeof eventType>(event))
         }
 
         source?.addEventListener(eventType, listener)

@@ -24,9 +24,6 @@ export default defineNuxtConfig({
         VBtn: {
           style: 'text-transform: none;'
         },
-        VToolbar: {
-          class: 'px-4'
-        },
         VCard: {
           elevation: '0'
         }
@@ -34,10 +31,17 @@ export default defineNuxtConfig({
     },
   },
   i18n: {
+    strategy: 'no_prefix',
     defaultLocale: 'en',
     locales: [
       { code: 'en', name: 'English', file: 'en.json' },
       { code: 'pl', name: 'Polski', file: 'pl.json' }
-    ]
+    ],
+    detectBrowserLanguage: {
+      useCookie: true,
+      cookieKey: 'i18n_redirected',
+      alwaysRedirect: false,
+      fallbackLocale: 'en'
+    }
   }
 })

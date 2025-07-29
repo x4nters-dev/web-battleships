@@ -1,5 +1,5 @@
 <template>
-    <v-toolbar>
+    <v-toolbar class="px-3">
         <v-btn :text="$t('create')" @click="create" />
 
         <template #append>
