@@ -1,8 +1,8 @@
 <template>
     <div>
-        <games-board-toolbar v-model="game" :ready-disabled="readyDisabled" @ready="ready" />
+        <GamesBoardToolbar v-model="game" :ready-disabled="readyDisabled" @ready="ready" />
         <v-container>
-            <app-board v-if="board" v-model="board" @click="draw" />
+            <AppBoard v-if="board" v-model="board" @click="draw" />
         </v-container>
     </div>
 </template>

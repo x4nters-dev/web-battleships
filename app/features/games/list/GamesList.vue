@@ -7,7 +7,6 @@
                     <GamesListItem :a-player-id="game.aPlayerId" :b-player-id="game.bPlayerId" :game-id="game.gameId"
                         :status="game.status" />
                 </v-col>
-
                 <v-col v-if="!games || games.length === 0" cols="12">
                     <GamesListEmpty />
                 </v-col>
@@ -47,8 +46,6 @@ watchEffect(() => {
     if (!updatedEvent.value) return
 
     const gamesWithId = games.value.filter(g => g.gameId === updatedEvent.value?.gameId) ?? []
-
-    console.log(games.value)
 
     for (const game of gamesWithId) {
         game.aPlayerId = updatedEvent.value.aPlayerId

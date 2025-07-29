@@ -2,7 +2,7 @@
     <v-toolbar>
         <template #append>
             <p>{{ tourLabel }}</p>
-            <app-info-icon :enemy-id="enemyId" :game-id="game?.gameId" />
+            <AppInfoIcon :enemy-id="enemyId" :game-id="game?.gameId" :player-id="player.playerId" />
         </template>
 
         <v-btn v-if="game?.status === GameStatus.preparing" :text="$t('ready')" :disabled="props.readyDisabled"

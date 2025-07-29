@@ -15,7 +15,7 @@ export default defineNuxtConfig({
     ]
   },
   imports: {
-    dirs: ['types']
+    dirs: ['types', 'enums']
   },
   vuetify: {
     vuetifyOptions: {
@@ -23,13 +23,21 @@ export default defineNuxtConfig({
       defaults: {
         VBtn: {
           style: 'text-transform: none;'
+        },
+        VToolbar: {
+          class: 'px-4'
+        },
+        VCard: {
+          elevation: '0'
         }
       }
     },
   },
   i18n: {
+    defaultLocale: 'en',
     locales: [
-      {code: 'en', name: 'English', file: 'en.json'}
+      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'pl', name: 'Polski', file: 'pl.json' }
     ]
   }
 })

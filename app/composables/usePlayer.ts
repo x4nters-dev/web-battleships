@@ -1,5 +1,5 @@
 export const usePlayer = () => {
-  return useState<{playerId: string | null}>('player', () => ({
+  return useState<{playerId: string}>('player', () => ({
     playerId: generateId(),
   }))
 }

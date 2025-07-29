@@ -1,0 +1,18 @@
+{
+    "appName": "Battleships",
+    "create": "Utwórz",
+    "enemy": "Przeciwnik",
+    "enemyReady": "Przeciwnik gotowy",
+    "enemyWon": "Przeciwnik wygrał",
+    "game": "Gra",
+    "gameCanceled": "Gra przerwana",
+    "giveUp": "Poddaj się",
+    "join": "Dołącz",
+    "noActiveGame": "Brak aktywnych gier",
+    "player": "Gracz",
+    "ready": "Gotowy",
+    "starting": "Start",
+    "tour": "Tura",
+    "waitingForEnemyToJoin": "Oczekiwanie na dołączenie przeciwnika...",
+    "youWon": "Wygrałeś!"
+}

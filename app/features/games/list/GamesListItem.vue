@@ -1,9 +1,8 @@
 <template>
-    <v-card :title="title" :subtitle="props.gameId" elevation="0">
+    <v-card :title="title" :subtitle="props.gameId">
         <template #prepend>
             <AppGameStatusIcon :status="props.status" />
         </template>
-
         <template #actions>
             <v-btn :text="$t('join')" :to="to" :disabled="joinDisabled" />
         </template>

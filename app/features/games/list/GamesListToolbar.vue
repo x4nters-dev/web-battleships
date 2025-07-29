@@ -3,7 +3,7 @@
         <v-btn :text="$t('create')" @click="create" />
 
         <template #append>
-            <app-info-icon />
+            <AppInfoIcon :player-id="player.playerId" />
         </template>
     </v-toolbar>
 </template>

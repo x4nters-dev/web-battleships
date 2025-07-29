@@ -16,11 +16,10 @@
 const props = defineProps<{
     gameId?: string
     enemyId?: string
+    playerId?: string
 }>()
 
-const player = usePlayer()
-
-const playerLabel = computed(() => `${$t('player')}: ${player.value.playerId}`)
+const playerLabel = computed(() => props.playerId ? `${$t('player')}: ${props.playerId}` : null)
 const gameLabel = computed(() => props.gameId ? `${$t('game')}: ${props.gameId}` : null)
 const enemyLabel = computed(() => props.enemyId ? `${$t('enemy')}: ${props.enemyId}` : null)
 </script>
