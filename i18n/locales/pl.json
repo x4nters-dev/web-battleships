@@ -1,6 +1,9 @@
 {
     "appName": "Battleships",
+    "battleships": "Pancerniki",
     "create": "Utwórz",
+    "cruisers": "Krążownik",
+    "destroyers": "Niszczyciel",
     "enemy": "Przeciwnik",
     "enemyReady": "Przeciwnik gotowy",
     "enemyWon": "Przeciwnik wygrał",
@@ -16,6 +19,7 @@
     "player": "Gracz",
     "ready": "Gotowy",
     "starting": "Start",
+    "submarines": "Okr. podwodne",
     "tour": "Tura",
     "waitingForEnemyToJoin": "Oczekiwanie na dołączenie przeciwnika...",
     "youWon": "Wygrałeś!"

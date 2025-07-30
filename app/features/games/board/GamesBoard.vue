@@ -32,7 +32,7 @@ onMounted(() => {
     })
 })
 
-watch([props.gameId, joinedEvent], () => {
+watch([joinedEvent], () => {
     gameApi.refresh()
 }, { immediate: true })
 

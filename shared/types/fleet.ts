@@ -1,0 +1,1 @@
+export type Fleet = Record<number, number>

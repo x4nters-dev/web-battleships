@@ -2,7 +2,14 @@
     <div>
         <GamesBoardToolbar v-model="game" :ready-disabled="readyDisabled" @ready="ready" />
         <v-container>
-            <AppBoard v-if="board" v-model="board" @click="draw" />
+            <v-row>
+                <v-col>
+                    <AppBoard v-if="board" v-model="board" @click="draw" />
+                </v-col>
+                <v-col>
+                    <GamesBoardFleet :fleet="fleet" />
+                </v-col>
+            </v-row>
         </v-container>
     </div>
 </template>
@@ -14,6 +21,8 @@ const game = defineModel<Game>()
 const player = usePlayer()
 const playerReady = ref(false)
 const board = ref<Board>()
+const fleet = ref<Fleet | null>(null)
+
 const readyDisabled = computed(() => {
     const filled = board.value?.cells.flat().filter(c => c.status === CellStatus.filled).length ?? 0
 
@@ -22,9 +31,16 @@ const readyDisabled = computed(() => {
 
 
 function draw(cell: Cell): void {
-    if (!board.value || !validateBoard(board.value, cell)) {
+    if (!board.value) {
         return
     }
+
+    const validatedFleet = validateBoard(board.value, cell)
+    if (!validatedFleet) {
+        return
+    }
+
+    fleet.value = validatedFleet
 
     switch (cell.status) {
         case CellStatus.empty:

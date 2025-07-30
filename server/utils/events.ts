@@ -20,7 +20,7 @@ export function connect(params: {event: H3Event, playerId: string}): {playerId: 
     req.on('close', () => {
         res.end()
         clients.delete(playerId)
-        console.log(`[SSE] Disconnected [${playerId}]`)
+        logInfo('sse', `Disconnected: ${playerId}`)
     })
     
     res.flushHeaders()
@@ -39,11 +39,12 @@ export function registerGame(params: {gameId: string }): void {
     games.set(params.gameId, [])
 } 
 
+// TODO: check why every new game is closed after first one
 export function joinGameEvents(params: {gameId: string, playerId: string}): void {
     const player = clients.get(params.playerId)
 
     if (!player) {
-        logError('sse', `Invalid playerId: ${params.playerId}`)
+        logError('sse', `aa Invalid playerId: ${params.playerId}`)
         return 
     }
 
@@ -58,8 +59,7 @@ export function leaveGameEvents(params: {gameId: string, playerId: string}): { f
     const game = games.get(params.gameId)
 
     if (!game) {
-        logError('sse', `Invalid gameId: ${params.gameId}`)
-        throw Error('invalid gameId')
+        return { final: true }
     }
     
     games.set(params.gameId, game.filter(g => g.playerId !== params.playerId) ?? [])
@@ -84,7 +84,7 @@ export function sendToGame<T extends EventType>(gameId: string, eventType: T, pa
 
     if (!game) {
         logError('sse', `Invalid gameId: ${gameId}`)
-        throw Error('no game')
+        throw Error('Invalid gameId')
     }
 
     const players = Array.from(game.values())

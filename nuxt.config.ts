@@ -7,6 +7,7 @@ export default defineNuxtConfig({
   modules: ['@nuxt/eslint', 'vuetify-nuxt-module', '@nuxtjs/i18n'],
   routeRules: {
     '/:gameId/**': { ssr: false},
+    '/**': { ssr: false },
   },
   components: {
     dirs: [
@@ -27,6 +28,9 @@ export default defineNuxtConfig({
         VCard: {
           elevation: '0'
         }
+      },
+      theme: {
+        defaultTheme: 'system'
       }
     },
   },

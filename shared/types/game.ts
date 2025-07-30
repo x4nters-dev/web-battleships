@@ -6,4 +6,6 @@ export type Game = {
     aBoard: Board
     bBoard: Board | null
     status: GameStatus
+
+    timeout?: NodeJS.Timeout
 }

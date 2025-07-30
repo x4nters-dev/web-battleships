@@ -1,6 +1,9 @@
 {
     "appName": "Battleships",
+    "battleships": "Battleship",
     "create": "Create",
+    "cruiser": "Cruiser",
+    "destroyer": "Destroyer",
     "enemy": "Enemy",
     "enemyReady": "Enemy ready",
     "enemyWon": "Enemy won",
@@ -16,6 +19,7 @@
     "player": "Player",
     "ready": "Ready",
     "starting": "Starting",
+    "submarine": "Submarine",
     "tour": "Tour",
     "waitingForEnemyToJoin": "Waiting for enemy to join...",
     "youWon": "You won!"

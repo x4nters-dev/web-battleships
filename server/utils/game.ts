@@ -20,7 +20,14 @@ export function getGames(): GameListItem[] {
 }
 
 export function getGame(params: {gameId: string}): Game | null {
-    return games.get(params.gameId) ?? null
+    const game = games.get(params.gameId)
+
+    return game ? {
+        aBoard: game.aBoard,
+        bBoard: game.bBoard,
+        gameId: game.gameId,
+        status: game.status,
+    } : null
 }
 
 export function createGame(params: { playerId: string }): { gameId: string} {
@@ -29,24 +36,31 @@ export function createGame(params: { playerId: string }): { gameId: string} {
         aBoard: generateBoard({ playerId: params.playerId }),
         bBoard: null,
         gameId,
-        status: GameStatus.created
+        status: GameStatus.created,
     }
 
     games.set(gameId, game)
-
+    
     registerGame({ gameId })
-
+    
     sendToAll(EventType.created, { 
         aPlayerId: params.playerId, 
         gameId
-     })
+    })
+    
+    resetTimeoutForGame(game)
+    logInfo('game', `Created: ${gameId}`)
 
     return { gameId }
 }
 
 export function joinGame(params: { gameId: string, playerId: string }): void {
     const game = games.get(params.gameId)
-    if (!game) throw Error('no game')
+
+    if (!game) {
+        logError('game', `Invalid gameId: ${params.gameId}`)
+        return
+    }
 
     if (params.playerId !== game.aBoard.playerId) {
         game.bBoard = generateBoard({ playerId: params.playerId })
@@ -60,7 +74,38 @@ export function joinGame(params: { gameId: string, playerId: string }): void {
         status: game.status
     })
 
-    joinGameEvents({ gameId: params.gameId, playerId: params.playerId })
+    joinGameEvents({ gameId: game.gameId, playerId: params.playerId })
+
+    resetTimeoutForGame(game)
+}
+
+export function terminateGame(params: {gameId: string}): void {
+    const game = games.get(params.gameId)
+
+    if (!game) {
+        logError('game', `Invalid gameId: ${params.gameId}`)
+        throw Error('Invalid gameId')
+    }
+
+    if (game.aBoard.playerId) 
+        leaveGame({gameId: game.gameId, playerId: game.aBoard.playerId})
+    if (game.bBoard?.playerId)
+        leaveGame({gameId: game.gameId, playerId: game.bBoard.playerId})
+    
+    game.status = GameStatus.canceled
+
+    clearTimeout(game.timeout)
+
+    sendToAll(EventType.updated, {
+        aPlayerId: game.gameId,
+        bPlayerId: game.bBoard?.playerId ?? null,
+        gameId: game.gameId,
+        status: game.status
+    })
+
+    games.delete(game.gameId)
+
+    logInfo('game', `Ended: ${game.gameId}`)
 }
 
 export function setReadyState(params: { gameId: string, playerId: string, cells: Cell[][]}): void {
@@ -107,6 +152,9 @@ export function setReadyState(params: { gameId: string, playerId: string, cells:
             status: game.status 
         })
     }
+
+    logInfo('game', `Ready: ${game.gameId}`)
+    resetTimeoutForGame(game)
 }
 
 export function tryShot(params: { attackerId: string, targetId: string, gameId: string, x: number, y: number }): void {
@@ -166,9 +214,11 @@ export function tryShot(params: { attackerId: string, targetId: string, gameId: 
                 gameId: game.gameId
             })
 
-            games.delete(params.gameId)
-        }, 10000);
+            terminateGame(game)
+        }, 10_000);
     }
+
+    resetTimeoutForGame(game)
 }
 
 export function leaveGame(params: { gameId: string, playerId: string }): void {
@@ -176,7 +226,7 @@ export function leaveGame(params: { gameId: string, playerId: string }): void {
 
     if (!game) {
         logError('game', `Invalid gameId: ${params.gameId}`)
-        throw Error('Invalid gameId')
+        return
     }
 
     if (game.status !== GameStatus.finished) {
@@ -201,4 +251,13 @@ export function leaveGame(params: { gameId: string, playerId: string }): void {
             games.delete(params.gameId)
         }, 10000);
     }
+}
+
+function resetTimeoutForGame(game: Game): void {
+    clearTimeout(game.timeout)
+
+    game.timeout = setTimeout(() => {
+        logInfo('sse', `Timeout: ${game.gameId}`)
+        terminateGame(game)
+    }, 10_000)
 }
