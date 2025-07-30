@@ -259,5 +259,5 @@ function resetTimeoutForGame(game: Game): void {
     game.timeout = setTimeout(() => {
         logInfo('sse', `Timeout: ${game.gameId}`)
         terminateGame(game)
-    }, 10_000)
-}
+    }, 3_600_000)
+} 

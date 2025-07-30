@@ -16,7 +16,7 @@ const props = defineProps<{
 const gameApi = useGameByIdApi({ gameId: props.gameId })
 const gamesApi = useGamesApi()
 const player = usePlayer()
-const game = computed(() => gameApi.data.value)
+const game = computed(() => gameApi.data.value ?? null)
 
 const joinedEvent = useJoinedEvent()
 const readyEvent = useReadyEvent()
