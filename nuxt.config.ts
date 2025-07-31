@@ -8,7 +8,8 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     'vuetify-nuxt-module',
     '@nuxtjs/i18n',
-    '@pinia/nuxt'
+    '@pinia/nuxt',
+    '@vueuse/nuxt'
   ],
   routeRules: {
     '/:gameId/**': { ssr: false},

@@ -4,7 +4,8 @@
             @refresh-game="refreshGame" />
         <GamesBoardPreparation v-if="game?.status === GameStatus.preparing" v-model="game"
             @refresh-game="refreshGame" />
-        <GamesBoardInProgress v-if="game?.status === GameStatus.inProgress" v-model="game" />
+        <GamesBoardInProgress v-if="game?.status === GameStatus.inProgress" v-model="game"
+            @refresh-game="refreshGame" />
     </div>
 </template>
 

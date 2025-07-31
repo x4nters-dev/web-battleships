@@ -19,6 +19,7 @@
 <script lang="ts" setup>
 import { CellStatus } from '~~/shared/enums/cellStatus'
 import { EventType } from '~~/shared/enums/events'
+import { GameStatus } from '~~/shared/enums/gameStatus'
 import { ShotStatus } from '~~/shared/enums/shotStatus'
 
 const player = usePlayer()
@@ -32,6 +33,11 @@ const playerSide = ref<'a' | 'b'>()
 const enemySide = ref<'a' | 'b'>()
 
 const sseEventsStore = useSseEventsStore()
+const shotSound = useShotSound()
+
+const emit = defineEmits<{
+    (e: 'refreshGame'): void
+}>()
 
 function shot(cell: Cell): void {
     $fetch(`/api/games/${game.value?.gameId}/shot`, {
@@ -69,12 +75,23 @@ function onShot(payload: ShotEvent): void {
     switch (status) {
         case ShotStatus.hit:
             cell.status = CellStatus.hit
+            shotSound.play()
             break
         case ShotStatus.missed:
             cell.status = CellStatus.missed
             break
         default:
             throw Error('invalid shot status')
+    }
+}
+
+function onUpdated(payload: UpdatedEvent): void {
+    if (payload.status === GameStatus.canceled) {
+        $fetch(`/api/games/${game.value?.gameId}/leave`).finally(() => {
+            emit('refreshGame')
+            alert($t('gameCanceled'))
+            navigateTo('/')
+        })
     }
 }
 
@@ -117,6 +134,9 @@ watchEffect(() => {
         case EventType.shot:
             onShot(payload as ShotEvent)
             break
+        case EventType.updated:
+            onUpdated(payload as UpdatedEvent)
+            break
         case EventType.finished:
             onFinished(payload as FinishedEvent)
             break
@@ -125,12 +145,5 @@ watchEffect(() => {
     sseEventsStore.clearLastEvent()
 })
 
-onBeforeUnmount(() => {
-    $fetch(`/api/games/${game.value?.gameId}/leave`, {
-        method: 'POST',
-        body: {
-            playerId: player.value.playerId
-        }
-    })
-})
+
 </script>

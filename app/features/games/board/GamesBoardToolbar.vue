@@ -7,10 +7,8 @@
             <AppInfoIcon :enemy-id="enemyId" :game-id="game?.gameId" :player-id="player.playerId" />
         </template>
 
-        <v-btn v-if="game?.status === GameStatus.preparing" :text="$t('ready')" :disabled="props.readyDisabled"
-            @click="emit('ready')" />
+        <v-btn v-if="gamePreparing" :text="$t('ready')" :disabled="props.readyDisabled" @click="emit('ready')" />
         <v-btn :text="$t('giveUp')" to="/" />
-
     </v-toolbar>
 </template>
 
@@ -39,6 +37,8 @@ const enemyId = computed(() => {
         return game.value?.aBoard.playerId
     }
 })
+
+const gamePreparing = computed(() => game.value?.status === GameStatus.preparing)
 
 const playerTour = computed(() => props.playerSide === props.currentSide && game.value?.status === GameStatus.inProgress)
 
