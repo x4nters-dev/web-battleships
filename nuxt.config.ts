@@ -4,7 +4,12 @@ import { md3 } from 'vuetify/blueprints'
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/eslint', 'vuetify-nuxt-module', '@nuxtjs/i18n'],
+  modules: [
+    '@nuxt/eslint',
+    'vuetify-nuxt-module',
+    '@nuxtjs/i18n',
+    '@pinia/nuxt'
+  ],
   routeRules: {
     '/:gameId/**': { ssr: false},
     '/**': { ssr: false },

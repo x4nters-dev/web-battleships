@@ -1,6 +1,7 @@
 <template>
     <v-toolbar class="px-3">
         <v-btn :text="$t('create')" @click="create" />
+        <v-btn :text="$t('changePlayerId')" @click="changePlayerId" />
 
         <template #append>
             <AppInfoIcon :player-id="player.playerId" />
@@ -10,6 +11,7 @@
 
 <script lang="ts" setup>
 const player = usePlayer()
+const sseEventsStore = useSseEventsStore()
 
 function create(): void {
     $fetch('/api/games', {
@@ -17,6 +19,11 @@ function create(): void {
         body: { playerId: player.value.playerId }
     })
         .then(res => { navigateTo(`/${res.gameId}`) })
-        .catch(err => alert(err.message))
+}
+
+function changePlayerId(): void {
+    const newPlayerId = generateId()
+    player.value.playerId = newPlayerId
+    sseEventsStore.reconnect(newPlayerId)
 }
 </script>

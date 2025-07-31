@@ -16,47 +16,60 @@
 </template>
 
 <script lang="ts" setup>
+import { EventType } from '~~/shared/enums/events'
 import { GameStatus } from '~~/shared/enums/gameStatus'
+
 
 
 const gamesApi = useGamesApi()
 const games = ref<GameListItem[]>([])
-const createdEvent = useCreatedEvent()
-const updatedEvent = useUpdatedEvent()
-const removedEvent = useRemovedEvent()
-
 const sortedGames = computed(() => games.value.slice().reverse())
+const sseEventsStore = useSseEventsStore()
+
+function onCreated(payload: CreatedEvent): void {
+    games.value.push({
+        aPlayerId: payload.aPlayerId,
+        bPlayerId: null,
+        gameId: payload.gameId,
+        status: GameStatus.created
+    })
+}
+
+function onUpdated(payload: UpdatedEvent): void {
+    const game = games.value.find(g => g.gameId === payload.gameId)
+
+    if (!game) return
+
+    game.aPlayerId = payload.aPlayerId
+    game.bPlayerId = payload.bPlayerId
+    game.status = payload.status
+}
+
+function onRemoved(payload: RemovedEvent): void {
+    games.value = games.value.filter(g => g.gameId !== payload.gameId)
+}
 
 watchEffect(() => {
     games.value = gamesApi.data.value ?? []
 })
 
 watchEffect(() => {
-    if (!createdEvent.value) return
+    if (!sseEventsStore.lastEvent) return
 
-    games.value.push({
-        aPlayerId: createdEvent.value!.aPlayerId,
-        bPlayerId: null,
-        gameId: createdEvent.value!.gameId,
-        status: GameStatus.created,
-    })
-})
+    const { eventType, payload } = sseEventsStore.lastEvent
 
-watchEffect(() => {
-    if (!updatedEvent.value) return
-
-    const gamesWithId = games.value.filter(g => g.gameId === updatedEvent.value?.gameId) ?? []
-
-    for (const game of gamesWithId) {
-        game.aPlayerId = updatedEvent.value.aPlayerId
-        game.bPlayerId = updatedEvent.value.bPlayerId
-        game.status = updatedEvent.value.status
+    switch (eventType) {
+        case EventType.created:
+            onCreated(payload as CreatedEvent)
+            break
+        case EventType.updated:
+            onUpdated(payload as UpdatedEvent)
+            break
+        case EventType.removed:
+            onRemoved(payload as RemovedEvent)
+            break
     }
-})
 
-watchEffect(() => {
-    if (!removedEvent.value) return
-
-    games.value = games.value.filter(g => g.gameId !== removedEvent.value?.gameId) ?? []
+    sseEventsStore.clearLastEvent()
 })
 </script>

@@ -1,6 +1,7 @@
 {
     "appName": "Battleships",
     "battleships": "Battleship",
+    "changePlayerId": "Change player ID",
     "create": "Create",
     "cruiser": "Cruiser",
     "destroyer": "Destroyer",
@@ -21,6 +22,8 @@
     "starting": "Starting",
     "submarine": "Submarine",
     "tour": "Tour",
+    "unknownErrorOccured": "An unknown error occurred",
+    "waitingForEnemyReady": "Waiting for enemy ready",
     "waitingForEnemyToJoin": "Waiting for enemy to join...",
     "youWon": "You won!"
 }

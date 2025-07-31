@@ -4,5 +4,10 @@ export default defineEventHandler(async (event) => {
   const { gameId } = getRouterParams(event) as { gameId: string }
   const { playerId } = await readBody<{playerId: string }>(event)
 
-  return joinGame({ gameId, playerId })
+  const { success } = joinGame({ gameId, playerId })
+
+  if (!success) return createError({
+    status: 400,
+    message: 'join failed'
+  })
 })

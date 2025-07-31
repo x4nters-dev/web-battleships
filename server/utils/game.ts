@@ -1,5 +1,5 @@
 import { GameStatus } from "~~/shared/enums/gameStatus"
-import type { Game } from "~~/shared/types/game"
+import type { Game, ServerGame } from "~~/shared/types/game"
 import { joinGameEvents, leaveGameEvents, registerGame, sendToAll } from "./events"
 import { EventType } from "~~/shared/enums/events"
 import type { Board } from "~~/shared/types/board"
@@ -8,7 +8,7 @@ import { CellStatus } from "~~/shared/enums/cellStatus"
 import { ShotStatus } from "~~/shared/enums/shotStatus"
 import { logError } from "./logger"
 
-const games = new Map<string, Game>()
+const games = new Map<string, ServerGame>()
 
 export function getGames(): GameListItem[] {
     return Array.from(games.values()).map(g => ({
@@ -54,12 +54,12 @@ export function createGame(params: { playerId: string }): { gameId: string} {
     return { gameId }
 }
 
-export function joinGame(params: { gameId: string, playerId: string }): void {
+export function joinGame(params: { gameId: string, playerId: string }): { success: boolean } {
     const game = games.get(params.gameId)
 
     if (!game) {
         logError('game', `Invalid gameId: ${params.gameId}`)
-        return
+        return { success: false }
     }
 
     if (params.playerId !== game.aBoard.playerId) {
@@ -74,17 +74,20 @@ export function joinGame(params: { gameId: string, playerId: string }): void {
         status: game.status
     })
 
-    joinGameEvents({ gameId: game.gameId, playerId: params.playerId })
+    const { success } = joinGameEvents({ gameId: game.gameId, playerId: params.playerId })
+    if (!success) return { success: false }
 
     resetTimeoutForGame(game)
+
+    return { success: true }
 }
 
-export function terminateGame(params: {gameId: string}): void {
+export function terminateGame(params: {gameId: string}): { success: boolean } {
     const game = games.get(params.gameId)
 
     if (!game) {
         logError('game', `Invalid gameId: ${params.gameId}`)
-        throw Error('Invalid gameId')
+        return { success: false }
     }
 
     if (game.aBoard.playerId) 
@@ -106,14 +109,16 @@ export function terminateGame(params: {gameId: string}): void {
     games.delete(game.gameId)
 
     logInfo('game', `Ended: ${game.gameId}`)
+
+    return { success: true }
 }
 
-export function setReadyState(params: { gameId: string, playerId: string, cells: Cell[][]}): void {
+export function setReadyState(params: { gameId: string, playerId: string, cells: Cell[][]}): { success: boolean } {
     const game = games.get(params.gameId)
 
     if (!game) {
         logError('game', `Invalid gameId: ${params.gameId}`)
-        throw Error('Invalid gameId')
+        return { success: false }
     }
 
     let board: Board
@@ -127,7 +132,7 @@ export function setReadyState(params: { gameId: string, playerId: string, cells:
             break
         default:
             logError('game', `Invalid playerId: ${params.playerId}`)
-            throw Error('Invalid playerId')
+            return { success: false }
     }
 
     board.cells = params.cells
@@ -155,14 +160,16 @@ export function setReadyState(params: { gameId: string, playerId: string, cells:
 
     logInfo('game', `Ready: ${game.gameId}`)
     resetTimeoutForGame(game)
+
+    return { success: true }
 }
 
-export function tryShot(params: { attackerId: string, targetId: string, gameId: string, x: number, y: number }): void {
+export function tryShot(params: { attackerId: string, targetId: string, gameId: string, x: number, y: number }): { success: boolean } {
     const game = games.get(params.gameId)
 
     if (!game) {
         logError('sse', `Invalid gameId: ${params.gameId}`)
-        throw Error('Invalid gameId')
+        return { success: false }
     }
     
     let target: Board;
@@ -176,7 +183,7 @@ export function tryShot(params: { attackerId: string, targetId: string, gameId: 
             break
         default:
             logError('game', `Invalid targetId: ${params.targetId}`)
-            throw Error('Invalid targetId')
+            return { success: false }
     }
 
     const cell = target.cells[params.x][params.y]
@@ -219,14 +226,16 @@ export function tryShot(params: { attackerId: string, targetId: string, gameId: 
     }
 
     resetTimeoutForGame(game)
+
+    return { success: true }
 }
 
-export function leaveGame(params: { gameId: string, playerId: string }): void {
+export function leaveGame(params: { gameId: string, playerId: string }): { success: boolean } {
     const game = games.get(params.gameId)
 
     if (!game) {
         logError('game', `Invalid gameId: ${params.gameId}`)
-        return
+        return { success: false }
     }
 
     if (game.status !== GameStatus.finished) {
@@ -251,9 +260,11 @@ export function leaveGame(params: { gameId: string, playerId: string }): void {
             games.delete(params.gameId)
         }, 10000);
     }
+
+    return { success: true }
 }
 
-function resetTimeoutForGame(game: Game): void {
+function resetTimeoutForGame(game: ServerGame): void {
     clearTimeout(game.timeout)
 
     game.timeout = setTimeout(() => {

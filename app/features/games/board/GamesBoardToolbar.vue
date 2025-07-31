@@ -1,13 +1,16 @@
 <template>
-    <v-toolbar class="px-3">
+    <v-toolbar class="px-3" :class="{ 'bg-green': playerTour }">
         <template #append>
-            <p>{{ tourLabel }}</p>
+            <span v-if="showEnemyReady" class="text-red px-4">{{ $t('enemyReady') }}</span>
+            <span v-if="showWaitingForEnemyReady" class="text-blue px-4">{{ $t('waitingForEnemyReady') }}</span>
+            <span v-if="tourLabel" class="px-4">{{ tourLabel }}</span>
             <AppInfoIcon :enemy-id="enemyId" :game-id="game?.gameId" :player-id="player.playerId" />
         </template>
 
         <v-btn v-if="game?.status === GameStatus.preparing" :text="$t('ready')" :disabled="props.readyDisabled"
             @click="emit('ready')" />
         <v-btn :text="$t('giveUp')" to="/" />
+
     </v-toolbar>
 </template>
 
@@ -21,6 +24,7 @@ const props = defineProps<{
     readyDisabled?: boolean
     currentSide?: 'a' | 'b'
     playerSide?: 'a' | 'b'
+    enemyReady?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -36,6 +40,8 @@ const enemyId = computed(() => {
     }
 })
 
+const playerTour = computed(() => props.playerSide === props.currentSide && game.value?.status === GameStatus.inProgress)
+
 const tourLabel = computed(() => {
     if (!props.currentSide || !props.playerSide) return null
 
@@ -43,4 +49,7 @@ const tourLabel = computed(() => {
 
     return `${$t('tour')}: ${tour}`
 })
+
+const showEnemyReady = computed(() => props.enemyReady && game.value?.status === GameStatus.preparing)
+const showWaitingForEnemyReady = computed(() => !props.enemyReady && game.value?.status === GameStatus.preparing)
 </script>

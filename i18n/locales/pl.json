@@ -1,6 +1,7 @@
 {
     "appName": "Battleships",
     "battleships": "Pancerniki",
+    "changePlayerId": "Zmień ID gracza",
     "create": "Utwórz",
     "cruisers": "Krążownik",
     "destroyers": "Niszczyciel",
@@ -21,6 +22,8 @@
     "starting": "Start",
     "submarines": "Okr. podwodne",
     "tour": "Tura",
+    "unknownErrorOccured": "Wystąpił nieznany błąd",
+    "waitingForEnemyReady": "Oczekiwanie na gotowość przeciwnika",
     "waitingForEnemyToJoin": "Oczekiwanie na dołączenie przeciwnika...",
     "youWon": "Wygrałeś!"
 }

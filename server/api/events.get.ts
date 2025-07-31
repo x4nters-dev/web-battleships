@@ -1,4 +1,9 @@
 export default defineEventHandler(async (event) => {
   const { playerId } = getQuery(event) as { playerId: string }
-  connect({ event, playerId })
+  const { success } = connect({ event, playerId })
+
+  if (!success) return createError({
+    message: 'connection failed',
+    status: 400,
+  })
 })

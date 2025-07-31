@@ -7,5 +7,5 @@ export enum EventType {
     started = 'started',
     shot = 'shot',
     finished = 'finished',
-    removed = 'removed'
+    removed = 'removed',
 }

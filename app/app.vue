@@ -7,5 +7,9 @@
 </template>
 
 <script lang="ts" setup>
-useMountAppEvents()
+const store = useSseEventsStore()
+
+onMounted(() => {
+  store.connect(usePlayer().value.playerId)
+})
 </script>

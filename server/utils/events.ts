@@ -7,7 +7,7 @@ import { logError, logInfo } from './logger'
 const clients = new Map<string, SseClient>()
 const games = new Map<string, SseClient[]>()
 
-export function connect(params: {event: H3Event, playerId: string}): {playerId: string} {
+export function connect(params: {event: H3Event, playerId: string}): { playerId: string, success: boolean } {
     const {req, res} = params.event.node
     const { event, playerId } = params
     
@@ -32,24 +32,24 @@ export function connect(params: {event: H3Event, playerId: string}): {playerId: 
 
     logInfo('sse', `Connected: ${playerId}`)
 
-    return { playerId }
+    return { playerId, success: true }
 }
 
 export function registerGame(params: {gameId: string }): void {
     games.set(params.gameId, [])
 } 
 
-// TODO: check why every new game is closed after first one
-export function joinGameEvents(params: {gameId: string, playerId: string}): void {
+export function joinGameEvents(params: {gameId: string, playerId: string}): { success: boolean } {
     const player = clients.get(params.playerId)
 
     if (!player) {
-        logError('sse', `aa Invalid playerId: ${params.playerId}`)
-        return 
+        logError('sse', `Invalid playerId: ${params.playerId}`)
+        return { success: false }
     }
 
     games.get(params.gameId)?.push(player)
-    sendToGame(params.gameId, EventType.joined, {
+
+    return sendToGame(params.gameId, EventType.joined, {
         bPlayerId: params.playerId,
         gameId: params.gameId
     })
@@ -79,12 +79,12 @@ export function sendToAll<T extends EventType>(eventType: T, payload: EventPaylo
     } 
 }
 
-export function sendToGame<T extends EventType>(gameId: string, eventType: T, payload: EventPayload<T>): void {
+export function sendToGame<T extends EventType>(gameId: string, eventType: T, payload: EventPayload<T>): { success: boolean } {
     const game = games.get(gameId)
 
     if (!game) {
         logError('sse', `Invalid gameId: ${gameId}`)
-        throw Error('Invalid gameId')
+        return { success: false }
     }
 
     const players = Array.from(game.values())
@@ -92,6 +92,8 @@ export function sendToGame<T extends EventType>(gameId: string, eventType: T, pa
     for (const { event } of players) {
         event.node.res.write(wrapEventPayload(eventType, payload))
     }
+
+    return { success: true }
 }
 
 function wrapEventPayload<T extends EventType>(eventType: T, payload: EventPayload<T>): string {

@@ -1,36 +1,51 @@
-import type { EventType } from "~~/shared/enums/events"
-import type { EventPayloadListener } from "~~/shared/types/events"
+import type { _GettersTree } from "pinia"
+import { EventType } from "~~/shared/enums/events"
 
-export function useEventSource() {
-    let source: EventSource | null = null
-    const listeners = ref<{eventType: EventType, listener: (event: MessageEvent<EventType>) => void}[]>([])
-    const player = usePlayer()
-
-    function on<T extends EventType>(eventType: T, callback: EventPayloadListener<T>): void {
-        const listener = (event: MessageEvent<EventType>) => {
-            callback(getEventData<typeof eventType>(event))
-        }
-
-        source?.addEventListener(eventType, listener)
-        listeners.value.push({eventType, listener})
-    }
-
-    function off<T extends EventType>(eventType: T): void {
-        for (const savedListener of listeners.value) {
-            if (savedListener.eventType === eventType) {
-                source?.removeEventListener(eventType, savedListener.listener)
-            }
-        }
-    }
-
-    watchEffect(() => {
-        source?.close()
-        source = new EventSource(`/api/events?playerId=${player.value.playerId}`)
-    })
-
-    onBeforeUnmount(() => {
-        source?.close()
-    })
-
-    return { on, off }
+type LastEvent<T extends EventType = EventType> = {
+    eventType: T,
+    payload: EventPayload<T>
 }
+
+type SseEventsState = {
+    source: EventSource | null
+    lastEvent: LastEvent | null
+}
+
+type SseEventsActions = {
+    connect: (playerId: string) => void
+    reconnect: (playerId: string) => void
+    clearLastEvent: () => void
+}
+
+export const useSseEventsStore = defineStore<'sseEvents', SseEventsState, _GettersTree<SseEventsState>, SseEventsActions>('sseEvents', {
+    state: () => ({
+        source: null,
+        lastEvent: null
+    }),
+    actions: {
+        connect(playerId: string) {
+            if (this.source) return
+
+            const url = `/api/events?playerId=${playerId}`
+            this.source = new EventSource(url)
+
+            const eventTypes = Object.values(EventType)
+
+            for (const eventType of eventTypes) {
+                this.source.addEventListener(eventType, event => {
+                    const payload = getEventData<typeof eventType>(event)
+                    this.lastEvent = { eventType, payload }
+                })
+            }
+        },
+        reconnect(playerId: string) {
+            this.source?.close()
+            this.source = null
+
+            this.connect(playerId)
+        },
+        clearLastEvent() {
+            this.lastEvent = null
+        },
+    },
+})

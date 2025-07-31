@@ -63,5 +63,3 @@ type EventMap = {
 }
 
 export type EventPayload<T extends EventType> = EventMap[T]
-
-export type EventPayloadListener<T extends EventType> = (payload: EventPayload<T>) => void

@@ -18,6 +18,7 @@
 
 <script lang="ts" setup>
 import { CellStatus } from '~~/shared/enums/cellStatus'
+import { EventType } from '~~/shared/enums/events'
 import { ShotStatus } from '~~/shared/enums/shotStatus'
 
 const player = usePlayer()
@@ -30,8 +31,7 @@ const currentSide = ref<'a' | 'b'>('a')
 const playerSide = ref<'a' | 'b'>()
 const enemySide = ref<'a' | 'b'>()
 
-const shotEvent = useShotEvent()
-const finishedEvent = useFinishedEvent()
+const sseEventsStore = useSseEventsStore()
 
 function shot(cell: Cell): void {
     $fetch(`/api/games/${game.value?.gameId}/shot`, {
@@ -42,7 +42,54 @@ function shot(cell: Cell): void {
             x: cell.x,
             y: cell.y
         }
+    }).catch(() => {
+        alert($t('unknownErrorOccured'))
+        navigateTo('/')
     })
+}
+
+function onShot(payload: ShotEvent): void {
+    const { x, y, status, targetId } = payload
+
+    let cell: Cell;
+
+    switch (targetId) {
+        case playerBoard.value?.playerId:
+            cell = playerBoard!.value!.cells![x]![y]!
+            currentSide.value = playerSide.value!
+            break
+        case enemyBoard.value?.playerId:
+            cell = enemyBoard.value!.cells![x]![y]!
+            currentSide.value = enemySide.value!
+            break
+        default:
+            throw Error('invalid player')
+    }
+
+    switch (status) {
+        case ShotStatus.hit:
+            cell.status = CellStatus.hit
+            break
+        case ShotStatus.missed:
+            cell.status = CellStatus.missed
+            break
+        default:
+            throw Error('invalid shot status')
+    }
+}
+
+function onFinished(payload: FinishedEvent): void {
+    const { winnerId } = payload
+
+    if (winnerId === playerBoard.value?.playerId) {
+        alert($t('youWon'))
+    }
+
+    if (winnerId === enemyBoard.value?.playerId) {
+        alert($t('enemyWon'))
+    }
+
+    navigateTo('/')
 }
 
 watchEffect(() => {
@@ -62,48 +109,28 @@ watchEffect(() => {
 })
 
 watchEffect(() => {
-    if (!shotEvent.value) return
+    if (!sseEventsStore.lastEvent) return
 
-    const { x, y } = shotEvent.value
+    const { eventType, payload } = sseEventsStore.lastEvent
 
-    let cell: Cell;
-
-    switch (shotEvent.value.targetId) {
-        case playerBoard.value?.playerId:
-            cell = playerBoard!.value!.cells![x]![y]!
-            currentSide.value = playerSide.value!
+    switch (eventType) {
+        case EventType.shot:
+            onShot(payload as ShotEvent)
             break
-        case enemyBoard.value?.playerId:
-            cell = enemyBoard.value!.cells![x]![y]!
-            currentSide.value = enemySide.value!
+        case EventType.finished:
+            onFinished(payload as FinishedEvent)
             break
-        default:
-            throw Error('invalid player')
     }
 
-    switch (shotEvent.value.status) {
-        case ShotStatus.hit:
-            cell.status = CellStatus.hit
-            break
-        case ShotStatus.missed:
-            cell.status = CellStatus.missed
-            break
-        default:
-            throw Error('invalid shot status')
-    }
+    sseEventsStore.clearLastEvent()
 })
 
-watchEffect(() => {
-    if (!finishedEvent.value) return
-
-    if (finishedEvent.value.winnerId === playerBoard.value?.playerId) {
-        alert($t('youWon'))
-    }
-
-    if (finishedEvent.value.winnerId === enemyBoard.value?.playerId) {
-        alert($t('enemyWon'))
-    }
-
-    navigateTo('/')
+onBeforeUnmount(() => {
+    $fetch(`/api/games/${game.value?.gameId}/leave`, {
+        method: 'POST',
+        body: {
+            playerId: player.value.playerId
+        }
+    })
 })
 </script>
