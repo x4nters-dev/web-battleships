@@ -1,11 +1,11 @@
 <template>
     <div>
-        <GamesBoardCreated v-if="game?.status === GameStatus.created" :game-id="game.gameId"
-            @refresh-game="refreshGame" />
-        <GamesBoardPreparation v-if="game?.status === GameStatus.preparing" v-model="game"
-            @refresh-game="refreshGame" />
-        <GamesBoardInProgress v-if="game?.status === GameStatus.inProgress" v-model="game"
-            @refresh-game="refreshGame" />
+        <div v-if="game">
+            <GamesBoardCreated v-if="createdStage" :game-id="game.gameId" @refresh-game="refreshGame" />
+            <GamesBoardPreparation v-if="preparingStage" v-model="game" @refresh-game="refreshGame" />
+            <GamesBoardInProgress v-if="inProgressStage" v-model="game" @refresh-game="refreshGame" />
+        </div>
+        <v-progress-circular v-else />
     </div>
 </template>
 
@@ -18,7 +18,11 @@ const props = defineProps<{
 
 const gameApi = useGameByIdApi({ gameId: props.gameId })
 const player = usePlayer()
+
 const game = computed(() => gameApi.data.value ?? null)
+const createdStage = computed(() => game.value?.status === GameStatus.created)
+const preparingStage = computed(() => game.value?.status === GameStatus.preparing)
+const inProgressStage = computed(() => game.value?.status === GameStatus.inProgress)
 
 function refreshGame(): void {
     gameApi.refresh()

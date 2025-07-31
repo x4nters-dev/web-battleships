@@ -19,18 +19,20 @@ import { CellStatus } from '~~/shared/enums/cellStatus'
 import { EventType } from '~~/shared/enums/events'
 import { GameStatus } from '~~/shared/enums/gameStatus'
 
-const game = defineModel<Game | null>()
 const player = usePlayer()
-const playerReady = ref(false)
-const enemyReady = ref(false)
-const board = ref<Board>()
-const fleet = ref<Fleet | null>(null)
 const sseEventsStore = useSseEventsStore()
 const gamesApi = useGamesApi()
+
+const game = defineModel<Game | null>()
 
 const emit = defineEmits<{
     (e: 'refreshGame'): void
 }>()
+
+const playerReady = ref(false)
+const enemyReady = ref(false)
+const board = ref<Board>()
+const fleet = ref<Fleet | null>(null)
 
 const readyDisabled = computed(() => {
     const filled = board.value?.cells.flat().filter(c => c.status === CellStatus.filled).length ?? 0
@@ -71,8 +73,6 @@ function ready(): void {
         body: { playerId: player.value.playerId, cells: board.value?.cells }
     })
 }
-
-
 
 function onReady(payload: ReadyEvent): void {
     if (player.value.playerId !== payload.playerId) {

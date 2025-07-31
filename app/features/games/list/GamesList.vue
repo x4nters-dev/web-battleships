@@ -7,7 +7,7 @@
                     <GamesListItem :a-player-id="game.aPlayerId" :b-player-id="game.bPlayerId" :game-id="game.gameId"
                         :status="game.status" />
                 </v-col>
-                <v-col v-if="!games || games.length === 0" cols="12">
+                <v-col v-if="isGameListEmpty" cols="12">
                     <GamesListEmpty />
                 </v-col>
             </v-row>
@@ -19,12 +19,13 @@
 import { EventType } from '~~/shared/enums/events'
 import { GameStatus } from '~~/shared/enums/gameStatus'
 
-
-
 const gamesApi = useGamesApi()
-const games = ref<GameListItem[]>([])
-const sortedGames = computed(() => games.value.slice().reverse())
 const sseEventsStore = useSseEventsStore()
+
+const games = ref<GameListItem[]>([])
+
+const sortedGames = computed(() => games.value.slice().reverse())
+const isGameListEmpty = computed(() => !games.value || games.value.length === 0)
 
 function onCreated(payload: CreatedEvent): void {
     games.value.push({
@@ -55,7 +56,6 @@ watchEffect(() => {
 
 watchEffect(() => {
     if (!sseEventsStore.lastEvent) return
-
     const { eventType, payload } = sseEventsStore.lastEvent
 
     switch (eventType) {

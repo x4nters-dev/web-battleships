@@ -23,21 +23,21 @@ import { GameStatus } from '~~/shared/enums/gameStatus'
 import { ShotStatus } from '~~/shared/enums/shotStatus'
 
 const player = usePlayer()
-const game = defineModel<Game>()
-
-const playerBoard = ref<Board>()
-const enemyBoard = ref<Board | null>()
-
-const currentSide = ref<'a' | 'b'>('a')
-const playerSide = ref<'a' | 'b'>()
-const enemySide = ref<'a' | 'b'>()
-
 const sseEventsStore = useSseEventsStore()
 const shotSound = useShotSound()
+
+const game = defineModel<Game>()
 
 const emit = defineEmits<{
     (e: 'refreshGame'): void
 }>()
+
+const playerBoard = ref<Board>()
+const enemyBoard = ref<Board | null>(null)
+
+const currentSide = ref<'a' | 'b'>('a')
+const playerSide = ref<'a' | 'b'>()
+const enemySide = ref<'a' | 'b'>()
 
 function shot(cell: Cell): void {
     $fetch(`/api/games/${game.value?.gameId}/shot`, {
@@ -69,7 +69,9 @@ function onShot(payload: ShotEvent): void {
             currentSide.value = enemySide.value!
             break
         default:
+            alert($t('unknownErrorOccured'))
             throw Error('invalid player')
+
     }
 
     switch (status) {
@@ -81,6 +83,7 @@ function onShot(payload: ShotEvent): void {
             cell.status = CellStatus.missed
             break
         default:
+            alert($t('unknownErrorOccured'))
             throw Error('invalid shot status')
     }
 }

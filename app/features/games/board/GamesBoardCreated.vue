@@ -42,7 +42,6 @@ function onUpdated(payload: UpdatedEvent): void {
 
 watchEffect(() => {
     if (!sseEventsStore.lastEvent) return
-
     const { eventType, payload } = sseEventsStore.lastEvent
 
     switch (eventType) {
